@@ -2,6 +2,7 @@
 
 public class PlayerController2D : MonoBehaviour
 {
+    // Variables
     public float Speed;
     public ParticleSystem rightDust;
     public ParticleSystem leftDust;
@@ -13,7 +14,7 @@ public class PlayerController2D : MonoBehaviour
     private bool FacingRight;
     private bool isMoving;
 
-    // Jumping
+    // Jumping Variables
     public int extraJumps;
     public float radius;
     public float jumpforce;
@@ -24,11 +25,14 @@ public class PlayerController2D : MonoBehaviour
 
     private void Start()
     {
+        // Gathering components
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         box = GetComponent<BoxCollider2D>();
         capsule = GetComponent<CapsuleCollider2D>();
         audioSource = GetComponent<AudioSource>();
+
+        // Setting the starting values
         FacingRight = true;
         extraJumpValue = extraJumps;
         
@@ -42,49 +46,40 @@ public class PlayerController2D : MonoBehaviour
         moveInput = Input.GetAxis("Horizontal");
         animator.SetFloat("Speed", Mathf.Abs(moveInput));
         rb.velocity = new Vector2(moveInput * Speed, rb.velocity.y);
-        if (FacingRight == true && moveInput < 0)
-        {
+
+        if (FacingRight == true && moveInput < 0){
             Flip();
         }
-        else if (FacingRight == false && moveInput > 0)
-        {
+        else if (FacingRight == false && moveInput > 0){
             Flip();
         }
         // End of movement
         
-        if (rb.velocity.x != 0)
-        {
+        // isMoving Check
+        if (rb.velocity.x != 0){
             isMoving = true;
-        }
-        else
-        {
+        }else{
             isMoving = false;
         }
 
-        if (isMoving && isGrounded())
-        {
-            if (!audioSource.isPlaying)
-            {
+        // Setting the audio
+        if (isMoving && isGrounded()){
+
+            if (!audioSource.isPlaying){
                 audioSource.Play();
             }
-        }
-        else
-        {
+        }else{
             audioSource.Stop();
         }
 
-        if (FacingRight && isMoving && isGrounded())
-        {
+        // Setting Dust mechanic (Particles)
+        if (FacingRight && isMoving && isGrounded()){
             StopLeft();
             RightDust();
-        }
-        else if (!FacingRight && isMoving && isGrounded() )
-        {
+        }else if (!FacingRight && isMoving && isGrounded() ){
             StopRight();
             LeftDust();
-        }
-        else if (!isMoving)
-        {
+        }else if (!isMoving){
             StopRight();
             StopLeft();
         }
@@ -94,18 +89,16 @@ public class PlayerController2D : MonoBehaviour
     {
         // Jumping
         vertical = rb.velocity.y;
-        if (isGrounded())
-        {
+        if (isGrounded()){
             vertical = 0;
             animator.SetBool("isJumping", false);
             extraJumpValue = extraJumps;
         }
         
         animator.SetFloat("Vertical", vertical);
-        // End of jumping
         animator.SetBool("isJumping", !isGrounded());
-        if (Input.GetKeyDown(KeyCode.W) && extraJumpValue > 0)
-        {
+
+        if (Input.GetKeyDown(KeyCode.W) && extraJumpValue > 0){
             Soundmanager.PlaySound("Jump");
             rb.velocity = Vector2.up * jumpforce;
             extraJumpValue -= 1;
@@ -114,33 +107,35 @@ public class PlayerController2D : MonoBehaviour
 
     }
 
-    void StopRight()
-    {
+    // Functions
+    void StopRight(){
         rightDust.Stop();
     }
-    void StopLeft()
-    {
+    
+    void StopLeft(){
         leftDust.Stop();
     }
-    void RightDust()
-    {
+
+    void RightDust(){
         rightDust.Play();
     }
-    void LeftDust()
-    {
+
+    void LeftDust(){
         leftDust.Play();
     }
-    void Flip()
-    {
+    
+    void Flip(){
         FacingRight = !FacingRight;
         transform.Rotate(0f, 180f, 0f);
     }
-    private bool isGrounded()
-    {
+
+    // isGrounded function
+    private bool isGrounded(){
         // --- Box Collider Check w/Raycast ---
         float extraHeight = 0.5f;
         RaycastHit2D raycastHit = Physics2D.BoxCast(box.bounds.center, box.bounds.size, 0f, Vector2.down, extraHeight, whatisGround);
-         // RaycastHit2D tryhit = Physics2D.CapsuleCast(capsule.bounds.center, capsule.bounds.size, "Vertical", 0f, Vector2.down, extraHeight, whatisGround); 
+        // RaycastHit2D tryhit = Physics2D.CapsuleCast(capsule.bounds.center, capsule.bounds.size, "Vertical", 0f, Vector2.down, extraHeight, whatisGround); 
+
         // --- Raycast Coloring ---
         Color raycastColor;
         if (raycastHit.collider != null)
